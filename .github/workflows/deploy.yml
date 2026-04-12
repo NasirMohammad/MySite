@@ -6,14 +6,30 @@ on:
       - main
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check workflow file exists
+        run: test -f .github/workflows/deploy.yml
+
+      - name: Check docker-compose file exists
+        run: test -f docker-compose.yml
+
+      - name: Check nginx config exists
+        run: test -f default.conf
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate   # 👈 IMPORTANT
+    env:
+      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+    steps:
       - name: Trigger EC2 deploy webhook
         run: |
-          curl -v -X POST "http://18.237.107.51:9000/deploy" \
-            -H "X-Deploy-Token: Allahisone@@##1122"
+          curl -X POST "http://18.237.107.51:9000/deploy" \
+            -H "X-Deploy-Token: $DEPLOY_TOKEN"
