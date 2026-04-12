@@ -1,0 +1,19 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trigger EC2 deploy webhook
+        run: |
+          curl -v -X POST "http://18.237.107.51:9000/deploy" \
+            -H "X-Deploy-Token: Allahisone@@##1122"
