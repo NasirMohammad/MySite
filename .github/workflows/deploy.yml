@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -17,5 +15,5 @@ jobs:
 
       - name: Trigger EC2 deploy webhook
         run: |
-          curl -X POST "http://18.237.107.51:9000/deploy" \
-            -H "X-Deploy-Token: $DEPLOY_TOKEN"
+          curl -v -X POST "http://18.237.107.51:9000/deploy" \
+            -H "X-Deploy-Token: Allahisone@@##1122"
