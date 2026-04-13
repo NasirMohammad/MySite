@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'nodeapp/**'
+      - 'nodeapp2/**'
+      - 'docker-compose.yml'
+      - 'default.conf'
+      - 'deploy.sh'
 
 jobs:
   validate:
