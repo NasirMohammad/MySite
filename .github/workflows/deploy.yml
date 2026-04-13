@@ -22,6 +22,21 @@ jobs:
       - name: Check nginx config exists
         run: test -f default.conf
 
+      - name: Check nginx upstream exists
+        run: grep -q "upstream app_backend" default.conf
+
+      - name: Check node app exists
+        run: test -f nodeapp/app.js
+
+      - name: Check node app 2 exists
+        run: test -f nodeapp2/app.js
+
+      - name: Check deploy script exists
+        run: test -f deploy.sh
+
+      - name: Check deploy script is executable
+        run: test -x deploy.sh
+
   deploy:
     runs-on: ubuntu-latest
     needs: validate   # 👈 IMPORTANT
@@ -31,5 +46,5 @@ jobs:
     steps:
       - name: Trigger EC2 deploy webhook
         run: |
-          curl -X POST "http://18.237.107.51:9000/deploy" \
+          curl --fail --show-error --silent -X POST "http://18.237.107.51:9000/deploy" \
             -H "X-Deploy-Token: $DEPLOY_TOKEN"
