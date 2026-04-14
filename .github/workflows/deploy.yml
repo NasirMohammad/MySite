@@ -52,5 +52,5 @@ jobs:
     steps:
       - name: Trigger EC2 deploy webhook
         run: |
-          curl --fail --show-error --silent -X POST "http://54.68.252.223:9000/deploy" \
+          curl --fail --show-error --silent -X POST "http://34.216.84.121:9000/deploy" \
             -H "X-Deploy-Token: $DEPLOY_TOKEN"
