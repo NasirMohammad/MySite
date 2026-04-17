@@ -37,5 +37,7 @@ jobs:
 
       - name: Deploy
         run: |
-          kubectl set image deployment/nodeapp-deployment nodeapp=erfanasir/mysite-nodeapp:latest
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl rollout restart deployment/nodeapp-deployment
           kubectl rollout status deployment/nodeapp-deployment
