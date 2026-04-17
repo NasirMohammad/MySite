@@ -44,4 +44,12 @@ docker exec nginx-proxy nginx -s reload
 echo "Stopping old container: nodeapp_$CURRENT"
 sudo docker stop nodeapp_$CURRENT
 
+# Telegram Alert
+TOKEN="8311833174:AAHPfsg4g5kYjQqLnDcJUduxTBUeJ4MOt5A"
+CHAT_ID="7354815897"
+
+curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+-d chat_id=$CHAT_ID \
+-d text="🚀 Deploy Successful on $(hostname)"
+
 echo "=== DEPLOY END ==="
