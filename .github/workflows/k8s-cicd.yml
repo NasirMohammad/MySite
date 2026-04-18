@@ -38,8 +38,10 @@ jobs:
           export KUBECONFIG=kubeconfig.yaml
           kubectl config get-contexts
 
-      - name: Deploy
+      - name: Deploy with Helm
         run: |
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
-          kubectl set image deployment/nodeapp-deployment nodeapp=erfanasir/mysite-nodeapp:${IMAGE_TAG}
-          kubectl rollout status deployment/nodeapp-deployment
+          helm upgrade --install nodeapp ./nodeapp-chart \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG}
