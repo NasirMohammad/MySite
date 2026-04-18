@@ -1,9 +1,10 @@
-name: Full CI/CD
+name: Branch Based Helm CI/CD
 
 on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   build-and-deploy:
@@ -32,16 +33,29 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
       - name: Set Kubeconfig
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
-          kubectl config get-contexts
+          kubectl get nodes
 
-      - name: Deploy with Helm
+      - name: Deploy to PROD
+        if: github.ref == 'refs/heads/main'
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
           helm upgrade --install nodeapp ./nodeapp-chart \
+            -f ./nodeapp-chart/values-prod.yaml \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG}
+
+      - name: Deploy to DEV
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm upgrade --install nodeapp-dev ./nodeapp-chart \
+            -f ./nodeapp-chart/values-dev.yaml \
             --set image.repository=erfanasir/mysite-nodeapp \
             --set image.tag=${IMAGE_TAG}

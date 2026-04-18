@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodeapp
+  name: {{ .Values.nameOverride | default "nodeapp" }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: nodeapp
+      app: {{ .Values.nameOverride | default "nodeapp" }}
   template:
     metadata:
       labels:
-        app: nodeapp
+        app: {{ .Values.nameOverride | default "nodeapp" }}
     spec:
       containers:
       - name: nodeapp
