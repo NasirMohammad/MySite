@@ -46,16 +46,18 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           export KUBECONFIG=kubeconfig.yaml
+          echo "IMAGE_TAG=${IMAGE_TAG}"
           helm upgrade --install nodeapp ./nodeapp-chart \
-            -f ./nodeapp-chart/values-prod.yaml \
-            --set image.repository=erfanasir/mysite-nodeapp \
-            --set image.tag=${IMAGE_TAG}
+          -f ./nodeapp-chart/values-prod.yaml \
+          --set image.repository=erfanasir/mysite-nodeapp \
+          --set image.tag=${IMAGE_TAG}
 
       - name: Deploy to DEV
         if: github.ref == 'refs/heads/dev'
         run: |
-          export KUBECONFIG=kubeconfig.yaml
-          helm upgrade --install nodeapp-dev ./nodeapp-chart \
-            -f ./nodeapp-chart/values-dev.yaml \
-            --set image.repository=erfanasir/mysite-nodeapp \
-            --set image.tag=${IMAGE_TAG}
+         export KUBECONFIG=kubeconfig.yaml
+         echo "IMAGE_TAG=${IMAGE_TAG}"
+         helm upgrade --install nodeapp-dev ./nodeapp-chart \
+         -f ./nodeapp-chart/values-dev.yaml \
+         --set image.repository=erfanasir/mysite-nodeapp \
+         --set image.tag=${IMAGE_TAG}
