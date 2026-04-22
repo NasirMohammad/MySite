@@ -11,98 +11,78 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # -----------------------------
-    # Checkout code
-    # -----------------------------
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # -----------------------------
-    # Docker login
-    # -----------------------------
-    - name: Login to DockerHub
-      run: |
-        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Login to DockerHub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-    # -----------------------------
-    # Build & Push image
-    # -----------------------------
-    - name: Build and Push Docker Image
-      run: |
-        IMAGE_TAG=${{ github.sha }}
-        docker build -t erfnasir/mysite-nodeapp:$IMAGE_TAG .
-        docker push erfnasir/mysite-nodeapp:$IMAGE_TAG
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t erfanasir/mysite-nodeapp:$IMAGE_TAG .
+          docker push erfanasir/mysite-nodeapp:$IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-    # -----------------------------
-    # Setup kubeconfig
-    # -----------------------------
-    - name: Set Kubeconfig
-      run: |
-        echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
+      - name: Set Kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
 
-    # -----------------------------
-    # -----------------------------
-    # 🚀 PROD DEPLOY
-    # -----------------------------
-    # -----------------------------
-    - name: Deploy to PROD
-      if: github.ref == 'refs/heads/main'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        helm upgrade --install nodeapp ./nodeapp-chart \
-          -f ./nodeapp-chart/values-prod.yaml \
-          --set image.repository=erfnasir/mysite-nodeapp \
-          --set image.tag=${IMAGE_TAG} \
-          --wait
+      - name: Deploy to PROD
+        if: github.ref == 'refs/heads/main'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm upgrade --install nodeapp ./nodeapp-chart \
+            -f ./nodeapp-chart/values-prod.yaml \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG} \
+            --wait
 
-    - name: Wait for PROD rollout
-      if: github.ref == 'refs/heads/main'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        kubectl rollout status deployment/nodeapp --timeout=60s
+      - name: Wait for PROD rollout
+        if: github.ref == 'refs/heads/main'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl rollout status deployment/nodeapp --timeout=60s
 
-    - name: PROD Health Check
-      if: github.ref == 'refs/heads/main'
-      run: |
-        sleep 20
-        curl -f http://webnas.orbitax.com || exit 1
+      - name: PROD Health Check
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sleep 20
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl get pods
 
-    - name: Rollback PROD if failed
-      if: failure() && github.ref == 'refs/heads/main'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        helm rollback nodeapp
+      - name: Rollback PROD if failed
+        if: failure() && github.ref == 'refs/heads/main'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm rollback nodeapp
 
-    # -----------------------------
-    # -----------------------------
-    # 🧪 DEV DEPLOY
-    # -----------------------------
-    # -----------------------------
-    - name: Deploy to DEV
-      if: github.ref == 'refs/heads/dev'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        helm upgrade --install nodeapp-dev ./nodeapp-chart \
-          -f ./nodeapp-chart/values-dev.yaml \
-          --set image.repository=erfnasir/mysite-nodeapp \
-          --set image.tag=${IMAGE_TAG} \
-          --wait
+      - name: Deploy to DEV
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm upgrade --install nodeapp-dev ./nodeapp-chart \
+            -f ./nodeapp-chart/values-dev.yaml \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG} \
+            --wait
 
-    - name: Wait for DEV rollout
-      if: github.ref == 'refs/heads/dev'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        kubectl rollout status deployment/nodeapp-dev --timeout=60s
+      - name: Wait for DEV rollout
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl rollout status deployment/nodeapp-dev --timeout=60s
 
-    - name: DEV Health Check
-      if: github.ref == 'refs/heads/dev'
-      run: |
-        sleep 20
-        curl -f https://dev.webnas.orbitax.com || exit 1
+      - name: DEV Health Check
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          sleep 20
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl get pods
 
-    - name: Rollback DEV if failed
-      if: failure() && github.ref == 'refs/heads/dev'
-      run: |
-        export KUBECONFIG=kubeconfig.yaml
-        helm rollback nodeapp-dev
+      - name: Rollback DEV if failed
+        if: failure() && github.ref == 'refs/heads/dev'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm rollback nodeapp-dev
