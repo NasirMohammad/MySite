@@ -9,6 +9,10 @@ nodePort: 30009
 
 replicaCount: 1
 nameOverride: nodeapp-dev
+host: dev.webnas.orbitax.com
+tlsSecretName: nodeapp-dev-tls
+env:
+  BOT_TOKEN: ""
 
 
 

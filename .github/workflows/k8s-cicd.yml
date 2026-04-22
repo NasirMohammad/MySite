@@ -42,22 +42,36 @@ jobs:
           export KUBECONFIG=kubeconfig.yaml
           kubectl get nodes
 
-      - name: Deploy to PROD
+      - name: Deploy to PROD with Helm
         if: github.ref == 'refs/heads/main'
         run: |
           export KUBECONFIG=kubeconfig.yaml
-          echo "IMAGE_TAG=${IMAGE_TAG}"
           helm upgrade --install nodeapp ./nodeapp-chart \
-          -f ./nodeapp-chart/values-prod.yaml \
-          --set image.repository=erfanasir/mysite-nodeapp \
-          --set image.tag=${IMAGE_TAG}
+            -f ./nodeapp-chart/values-prod.yaml \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG} \
+            --wait --timeout 5m
 
-      - name: Deploy to DEV
+      - name: Rollback PROD on failure
+        if: failure() && github.ref == 'refs/heads/main'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm rollback nodeapp 0 || true
+          kubectl rollout status deployment/nodeapp --timeout=120s || true
+
+      - name: Deploy to DEV with Helm
         if: github.ref == 'refs/heads/dev'
         run: |
-         export KUBECONFIG=kubeconfig.yaml
-         echo "IMAGE_TAG=${IMAGE_TAG}"
-         helm upgrade --install nodeapp-dev ./nodeapp-chart \
-         -f ./nodeapp-chart/values-dev.yaml \
-         --set image.repository=erfanasir/mysite-nodeapp \
-         --set image.tag=${IMAGE_TAG}
+          export KUBECONFIG=kubeconfig.yaml
+          helm upgrade --install nodeapp-dev ./nodeapp-chart \
+            -f ./nodeapp-chart/values-dev.yaml \
+            --set image.repository=erfanasir/mysite-nodeapp \
+            --set image.tag=${IMAGE_TAG} \
+            --wait --timeout 5m
+
+      - name: Rollback DEV on failure
+        if: failure() && github.ref == 'refs/heads/dev'
+        run: |
+          export KUBECONFIG=kubeconfig.yaml
+          helm rollback nodeapp-dev 0 || true
+          kubectl rollout status deployment/nodeapp-dev --timeout=120s || true

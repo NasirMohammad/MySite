@@ -8,7 +8,11 @@ image:
 nodePort: 30008
 
 replicaCount: 3
-
+nameOverride: nodeapp
+host: webnas.orbitax.com
+tlsSecretName: nodeapp-tls
+env:
+  BOT_TOKEN: ""
 
 
 
