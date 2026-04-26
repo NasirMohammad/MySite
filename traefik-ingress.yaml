@@ -1,12 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nodeapp-ingress
+  name: nodeapp-prod-ingress
   annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - webnas.orbitax.com
+    secretName: nodeapp-tls
   rules:
   - host: webnas.orbitax.com
     http:
@@ -18,6 +21,20 @@ spec:
             name: nodeapp
             port:
               number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodeapp-dev-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - dev.webnas.orbitax.com
+    secretName: nodeapp-dev-tls
+  rules:
   - host: dev.webnas.orbitax.com
     http:
       paths:

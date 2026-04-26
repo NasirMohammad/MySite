@@ -13,8 +13,9 @@ spec:
         app: {{ .Values.nameOverride | default "nodeapp" }}
     spec:
       containers:
-        - name: nodeapp
+        - name: {{ .Values.nameOverride | default "nodeapp" }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 3000
           resources:
@@ -30,3 +31,6 @@ spec:
                 secretKeyRef:
                   name: telegram-secret
                   key: BOT_TOKEN
+{{- if .Values.env }}
+{{ toYaml .Values.env | nindent 12 }}
+{{- end }}

@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nodeapp-monitor
+  namespace: default
+  labels:
+    release: monitoring   # 🔥 THIS IS THE KEY FIX
+spec:
+  selector:
+    matchLabels:
+      app: nodeapp
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
